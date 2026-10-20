@@ -88,6 +88,9 @@ dd .name { font-weight: 700; font-size: 17px; }
 .num { font-variant-numeric: tabular-nums; user-select: all; }
 .copy { margin-left: 8px; font: 500 13px var(--body); padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--fg); cursor: pointer; }
 .note { margin: 0; font-size: 12px; color: var(--muted); text-align: center; }
+.when { margin: 0; text-align: center; font-family: var(--display); font-size: 21px; color: var(--chestnut); letter-spacing: .06em; line-height: 1.4; }
+.after .when2 { margin: 0 0 2px; font-family: var(--display); font-size: 19px; color: #fff; letter-spacing: .06em; }
+body.big .when { visibility: hidden; }
 </style>
 </head>
 <body>
@@ -96,6 +99,7 @@ dd .name { font-weight: 700; font-size: 17px; }
     <video id="v" src="video/annai.mp4" poster="video/poster.jpg" controls playsinline preload="metadata"></video>
     <button class="close" id="close" type="button" aria-label="小さくする">×</button>
     <div class="after" id="after" hidden>
+      <p class="when2">11月14日（土）19時開始</p>
       <p>会場はこちら</p>
       <div class="row">
         <a href="https://www.hotpepper.jp/strJ000064275/" target="_blank" rel="noopener">お店のページ</a>
@@ -106,6 +110,8 @@ dd .name { font-weight: 700; font-size: 17px; }
       <div class="row"><button class="again" id="again" type="button">もう一度見る</button></div>
     </div>
   </div>
+
+  <p class="when pad">11月14日（土）19時開始</p>
 
   <nav class="actions pad" aria-label="会場のリンク">
     <a class="btn shop" href="https://www.hotpepper.jp/strJ000064275/" target="_blank" rel="noopener">
