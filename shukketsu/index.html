@@ -28,7 +28,7 @@ textarea{font-size:18px;width:100%;box-sizing:border-box;padding:10px;border:1px
 <script>
 // ここの2つは作った後に入れる(秘密ではない)
 var LIFF_ID = '2012622212-6mexdvhC';
-var API = '__GAS_URL__';
+var API = 'https://script.google.com/macros/s/AKfycbzkfhzJ_BjT2YuCkLHHabcPHMnVoOjZfTPblXq4W8_p2LoKuuddV3AIBPCa2PqdShYNbQ/exec';
 var D = null, pick = {};
 function el(i){return document.getElementById(i)}
 function call(o){o.idToken=liff.getIDToken();return fetch(API,{method:'POST',body:JSON.stringify(o)}).then(function(r){return r.json()})}
