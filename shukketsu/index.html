@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>出欠</title>
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+body{font-family:sans-serif;margin:0;padding:16px;background:#f6f7f9;color:#222;font-size:18px}
+h1{font-size:24px;margin:8px 0}
+.card{background:#fff;border-radius:12px;padding:16px;margin:12px 0;box-shadow:0 1px 3px #0002}
+button{font-size:18px;border:0;border-radius:10px;padding:12px 14px;margin:4px;background:#e8ecf2}
+.row{border-bottom:1px solid #eee;padding:8px 0}.d{font-weight:bold}
+.ox button{width:29%;font-size:22px}
+.o.sel{background:#2f855a;color:#fff}.s.sel{background:#b7791f;color:#fff}.x.sel{background:#c53030;color:#fff}
+textarea{font-size:18px;width:100%;box-sizing:border-box;padding:10px;border:1px solid #ccc;border-radius:8px}
+.go{background:#06c755;color:#fff;width:100%;font-size:20px;padding:16px;margin:12px 0 0}
+.muted{color:#666;font-size:15px}.hide{display:none}
+</style></head><body>
+<h1 id="title">読み込み中…</h1>
+<div id="note" class="muted"></div>
+<div id="form" class="card hide">
+  <div class="muted">参加できる日に ○、たぶん △、無理 ×</div>
+  <div id="dates"></div>
+  <div style="margin-top:10px">ひとこと(なくてもOK)</div>
+  <textarea id="comment" rows="2"></textarea>
+  <button class="go" onclick="send()">送る</button>
+  <div id="msg" class="muted"></div>
+</div>
+<div id="done" class="card hide"><b>送りました。ありがとう!</b><br><button onclick="edit()">返事を直す</button></div>
+<script>
+// ここの2つは作った後に入れる(秘密ではない)
+var LIFF_ID = '__LIFF_ID__';
+var API = '__GAS_URL__';
+var D = null, pick = {};
+function el(i){return document.getElementById(i)}
+function call(o){o.idToken=liff.getIDToken();return fetch(API,{method:'POST',body:JSON.stringify(o)}).then(function(r){return r.json()})}
+liff.init({liffId: LIFF_ID}).then(function(){
+  if(!liff.isLoggedIn()){liff.login({redirectUri: location.href});return}
+  return call({act:'open'}).then(function(r){
+    if(!r.ok) throw new Error(r.err);
+    D=r; el('title').textContent=r.title; el('note').textContent=r.note;
+    if(r.mine){pick=r.mine.a||{}; el('comment').value=r.mine.c||''; el('done').classList.remove('hide')}
+    else {draw(); el('form').classList.remove('hide')}
+  });
+}).catch(function(e){el('title').textContent='開けませんでした'; el('note').textContent=(e&&e.message)||'LINEの中で開き直してください'});
+function draw(){
+  var box=el('dates'); box.innerHTML='';
+  D.dates.forEach(function(d){
+    var row=document.createElement('div'); row.className='row';
+    var t=document.createElement('div'); t.className='d'; t.textContent=d; row.appendChild(t);
+    var ox=document.createElement('div'); ox.className='ox';
+    [['○','o'],['△','s'],['×','x']].forEach(function(k){var b=document.createElement('button');b.textContent=k[0];b.className=k[1]+(pick[d]===k[0]?' sel':'');b.onclick=function(){pick[d]=k[0];draw()};ox.appendChild(b)});
+    row.appendChild(ox); box.appendChild(row);
+  });
+}
+function edit(){el('done').classList.add('hide'); draw(); el('form').classList.remove('hide')}
+function send(){
+  var miss=D.dates.filter(function(d){return !pick[d]});
+  if(miss.length){el('msg').textContent='まだ選んでいない日があります';return}
+  el('msg').textContent='送っています…';
+  call({act:'answer',answers:pick,comment:el('comment').value}).then(function(r){
+    if(!r.ok) throw new Error(r.err);
+    el('msg').textContent=''; el('form').classList.add('hide'); el('done').classList.remove('hide');
+  }).catch(function(){el('msg').textContent='送れませんでした。もう一度押してください'});
+}
+</script></body></html>
