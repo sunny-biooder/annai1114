@@ -1,64 +1,111 @@
 <!DOCTYPE html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>出欠</title>
 <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <style>
-body{font-family:sans-serif;margin:0;padding:16px;background:#f6f7f9;color:#222;font-size:18px}
-h1{font-size:24px;margin:8px 0}
-.card{background:#fff;border-radius:12px;padding:16px;margin:12px 0;box-shadow:0 1px 3px #0002}
-button{font-size:18px;border:0;border-radius:10px;padding:12px 14px;margin:4px;background:#e8ecf2}
-.row{border-bottom:1px solid #eee;padding:8px 0}.d{font-weight:bold}
-.ox button{width:29%;font-size:22px}
-.o.sel{background:#2f855a;color:#fff}.s.sel{background:#b7791f;color:#fff}.x.sel{background:#c53030;color:#fff}
-textarea{font-size:18px;width:100%;box-sizing:border-box;padding:10px;border:1px solid #ccc;border-radius:8px}
-.go{background:#06c755;color:#fff;width:100%;font-size:20px;padding:16px;margin:12px 0 0}
-.muted{color:#666;font-size:15px}.hide{display:none}
+:root{--g:#06c755;--g2:#04a648;--o:#06c755;--s:#f2a516;--x:#e5484d;--bg:#f2f4f7;--ink:#1c1e21;--sub:#6b7280}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;font-size:17px;padding-bottom:120px}
+.top{background:linear-gradient(160deg,#07d65c,#04a648);color:#fff;padding:28px 20px 46px;border-radius:0 0 28px 28px}
+.tag{display:inline-block;background:#ffffff33;border-radius:99px;padding:4px 12px;font-size:13px;font-weight:600}
+h1{font-size:26px;line-height:1.3;margin:12px 0 6px}
+.note{font-size:15px;opacity:.95;line-height:1.6;white-space:pre-wrap}
+.wrap{padding:0 16px;margin-top:-28px}
+.hi{background:#fff;border-radius:18px;padding:16px 18px;box-shadow:0 4px 14px #0000000f;font-size:16px;line-height:1.6}
+.hi b{font-size:18px}
+.day{background:#fff;border-radius:18px;padding:16px;margin-top:12px;box-shadow:0 4px 14px #0000000f;transition:box-shadow .2s}
+.day.ok{box-shadow:0 0 0 2px #06c75555,0 4px 14px #0000000f}
+.dt{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
+.dt .d{font-size:21px;font-weight:700}.dt .t{font-size:15px;color:var(--sub)}
+.ox{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ox button{border:2px solid #e5e7eb;background:#fff;border-radius:14px;padding:12px 4px 10px;font-size:15px;color:var(--ink);font-weight:600;transition:transform .1s}
+.ox button span{display:block;font-size:30px;line-height:1.1;margin-bottom:2px}
+.ox button:active{transform:scale(.95)}
+.ox .o.sel{background:var(--o);border-color:var(--o);color:#fff}
+.ox .s.sel{background:var(--s);border-color:var(--s);color:#fff}
+.ox .x.sel{background:var(--x);border-color:var(--x);color:#fff}
+.more{margin-top:14px;background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 4px 14px #0000000f}
+.more summary{color:var(--sub);font-size:15px;list-style:none;cursor:pointer}
+.more summary::-webkit-details-marker{display:none}
+textarea{width:100%;margin-top:10px;font-size:17px;padding:12px;border:1.5px solid #e5e7eb;border-radius:12px;font-family:inherit}
+.bar{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:#ffffffee;backdrop-filter:blur(8px);box-shadow:0 -2px 12px #0000000d}
+.left{text-align:center;font-size:14px;color:var(--sub);margin-bottom:8px}
+.go{width:100%;border:0;border-radius:16px;background:var(--g);color:#fff;font-size:19px;font-weight:700;padding:17px}
+.go:disabled{background:#c7cdd4}
+.go:not(:disabled):active{background:var(--g2)}
+.done{text-align:center;padding:26px 18px}
+.check{width:76px;height:76px;border-radius:50%;background:var(--g);color:#fff;font-size:44px;line-height:76px;margin:0 auto 12px}
+.done h2{margin:0 0 4px;font-size:23px}
+.mine{margin:16px 0 4px;text-align:left}
+.mine div{display:flex;justify-content:space-between;align-items:center;padding:11px 2px;border-bottom:1px solid #f0f1f3;font-size:16px}
+.mine em{font-style:normal;font-weight:700;border-radius:99px;padding:3px 12px;color:#fff;font-size:15px}
+.sub{color:var(--sub);font-size:14px}
+.btn2{border:1.5px solid #d1d5db;background:#fff;border-radius:14px;padding:12px 18px;font-size:16px;margin:14px 6px 0;color:var(--ink)}
+.hide{display:none}
+.spin{margin:60px auto;width:36px;height:36px;border:4px solid #d1fae5;border-top-color:var(--g);border-radius:50%;animation:r 1s linear infinite}
+@keyframes r{to{transform:rotate(360deg)}}
 </style></head><body>
-<h1 id="title">読み込み中…</h1>
-<div id="note" class="muted"></div>
-<div id="form" class="card hide">
-  <div class="muted">参加できる日に ○、たぶん △、無理 ×</div>
-  <div id="dates"></div>
-  <div style="margin-top:10px">ひとこと(なくてもOK)</div>
-  <textarea id="comment" rows="2"></textarea>
-  <button class="go" onclick="send()">送る</button>
-  <div id="msg" class="muted"></div>
+<div class="top"><span class="tag">出欠のおたずね</span><h1 id="title">読み込み中…</h1><div class="note" id="note"></div></div>
+<div class="wrap">
+  <div id="load" class="spin"></div>
+  <div id="form" class="hide">
+    <div class="hi"><b id="who"></b><br>行けそうな日を、ポンポンと押すだけです。<br><span class="sub">あとから何回でも直せます。</span></div>
+    <div id="dates"></div>
+    <details class="more"><summary>💬 ひとこと書く（なくてOK）</summary><textarea id="comment" rows="2" placeholder="例: 2次会から行きます"></textarea></details>
+  </div>
+  <div id="done" class="day done hide">
+    <div class="check">✓</div><h2>送りました！</h2><div class="sub">ありがとう。当日会えるのを楽しみにしています。</div>
+    <div class="mine" id="mine"></div>
+    <button class="btn2" onclick="edit()">返事を直す</button><button class="btn2" onclick="bye()">閉じる</button>
+  </div>
 </div>
-<div id="done" class="card hide"><b>送りました。ありがとう!</b><br><button onclick="edit()">返事を直す</button></div>
+<div class="bar hide" id="bar"><div class="left" id="left"></div><button class="go" id="go" onclick="send()" disabled>送る</button></div>
 <script>
-// ここの2つは作った後に入れる(秘密ではない)
 var LIFF_ID = '2012622212-6mexdvhC';
 var API = 'https://script.google.com/macros/s/AKfycbzkfhzJ_BjT2YuCkLHHabcPHMnVoOjZfTPblXq4W8_p2LoKuuddV3AIBPCa2PqdShYNbQ/exec';
-var D = null, pick = {};
+var D = null, pick = {}, OX = [['○','o','行ける'],['△','s','たぶん'],['×','x','無理']], COL = {'○':'var(--o)','△':'var(--s)','×':'var(--x)'};
 function el(i){return document.getElementById(i)}
+function show(id,on){el(id).classList.toggle('hide',!on)}
 function call(o){o.idToken=liff.getIDToken();return fetch(API,{method:'POST',body:JSON.stringify(o)}).then(function(r){return r.json()})}
 liff.init({liffId: LIFF_ID}).then(function(){
   if(!liff.isLoggedIn()){liff.login({redirectUri: location.href});return}
+  liff.getProfile().then(function(p){el('who').textContent=p.displayName+'さん、こんにちは'}).catch(function(){el('who').textContent='こんにちは'});
   return call({act:'open'}).then(function(r){
     if(!r.ok) throw new Error(r.err);
-    D=r; el('title').textContent=r.title; el('note').textContent=r.note;
-    if(r.mine){pick=r.mine.a||{}; el('comment').value=r.mine.c||''; el('done').classList.remove('hide')}
-    else {draw(); el('form').classList.remove('hide')}
+    D=r; el('title').textContent=r.title||'同窓会'; el('note').textContent=r.note||'';
+    show('load',false);
+    if(r.mine){pick=r.mine.a||{}; el('comment').value=r.mine.c||''; doneView()} else formView();
   });
-}).catch(function(e){el('title').textContent='開けませんでした'; el('note').textContent=(e&&e.message)||'LINEの中で開き直してください'});
+}).catch(function(e){show('load',false);el('title').textContent='開けませんでした';el('note').textContent=(e&&e.message)||'LINEの中で開き直してください'});
+function split(d){var m=String(d).match(/^(.*?[)）])\s*(.*)$/);return m?[m[1],m[2]]:[d,'']}
 function draw(){
   var box=el('dates'); box.innerHTML='';
   D.dates.forEach(function(d){
-    var row=document.createElement('div'); row.className='row';
-    var t=document.createElement('div'); t.className='d'; t.textContent=d; row.appendChild(t);
+    var c=document.createElement('div'); c.className='day'+(pick[d]?' ok':'');
+    var s=split(d); c.innerHTML='<div class="dt"><span class="d"></span><span class="t"></span></div>';
+    c.querySelector('.d').textContent=s[0]; c.querySelector('.t').textContent=s[1];
     var ox=document.createElement('div'); ox.className='ox';
-    [['○','o'],['△','s'],['×','x']].forEach(function(k){var b=document.createElement('button');b.textContent=k[0];b.className=k[1]+(pick[d]===k[0]?' sel':'');b.onclick=function(){pick[d]=k[0];draw()};ox.appendChild(b)});
-    row.appendChild(ox); box.appendChild(row);
+    OX.forEach(function(k){var b=document.createElement('button');b.className=k[1]+(pick[d]===k[0]?' sel':'');b.innerHTML='<span>'+k[0]+'</span>'+k[2];b.onclick=function(){pick[d]=k[0];draw()};ox.appendChild(b)});
+    c.appendChild(ox); box.appendChild(c);
   });
+  var n=D.dates.filter(function(d){return !pick[d]}).length;
+  el('left').textContent=n?'あと '+n+' 日えらんでください':'ぜんぶ選べました';
+  el('go').disabled=n>0; el('go').textContent='送る';
 }
-function edit(){el('done').classList.add('hide'); draw(); el('form').classList.remove('hide')}
+function formView(){show('done',false);show('form',true);show('bar',true);draw()}
+function doneView(){
+  show('form',false);show('bar',false);show('done',true);
+  var m=el('mine'); m.innerHTML='';
+  D.dates.forEach(function(d){var v=pick[d]||'－';var r=document.createElement('div');r.innerHTML='<span></span><em></em>';r.firstChild.textContent=d;var e=r.lastChild;e.textContent=v+' '+((OX.filter(function(k){return k[0]===v})[0]||[0,0,''])[2]);e.style.background=COL[v]||'#9ca3af';m.appendChild(r)});
+  var c=el('comment').value; if(c){var r=document.createElement('div');r.className='sub';r.textContent='💬 '+c;m.appendChild(r)}
+  window.scrollTo(0,0);
+}
+function edit(){formView()}
+function bye(){try{liff.closeWindow()}catch(e){}}
 function send(){
-  var miss=D.dates.filter(function(d){return !pick[d]});
-  if(miss.length){el('msg').textContent='まだ選んでいない日があります';return}
-  el('msg').textContent='送っています…';
+  el('go').disabled=true; el('go').textContent='送っています…';
   call({act:'answer',answers:pick,comment:el('comment').value}).then(function(r){
-    if(!r.ok) throw new Error(r.err);
-    el('msg').textContent=''; el('form').classList.add('hide'); el('done').classList.remove('hide');
-  }).catch(function(){el('msg').textContent='送れませんでした。もう一度押してください'});
+    if(!r.ok) throw new Error(r.err); doneView();
+  }).catch(function(){el('go').disabled=false;el('go').textContent='送れませんでした。もう一度押す'});
 }
 </script></body></html>
