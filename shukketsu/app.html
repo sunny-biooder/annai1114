@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>出欠</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Yomogi&display=swap" rel="stylesheet">
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+:root{--board:#1f4a3a;--board2:#183b2e;--chalk:#f4f1e6;--yel:#ffe27a;--pink:#ffb3c7;--o:#36c26b;--s:#f2a516;--x:#e5484d;--wood:#8a5a32}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--board);background-image:radial-gradient(#ffffff08 1px,transparent 1px),linear-gradient(170deg,#24553f,#173829);background-size:6px 6px,100% 100%;background-attachment:fixed;color:var(--chalk);font-family:"Klee One","Yomogi",sans-serif;font-size:18px;padding-bottom:130px;min-height:100vh}
+.chalk{font-family:"Yomogi","Klee One",sans-serif;text-shadow:0 0 1px #fff8,0 0 6px #fff2}
+#intro{position:fixed;inset:0;z-index:20;background:var(--board2);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transition:opacity .6s}
+#intro .bell{font-size:64px}
+#intro.go .bell{animation:ring .5s ease-in-out 5}
+#intro .k{font-size:26px;margin-top:10px;letter-spacing:2px}
+#intro .t{font-size:30px;margin-top:22px;opacity:0}
+#intro.go .t{animation:fade .8s 1.4s forwards}
+#intro .tap{position:absolute;bottom:40px;font-size:14px;opacity:.6}
+@keyframes ring{0%,100%{transform:rotate(0)}25%{transform:rotate(-18deg)}75%{transform:rotate(18deg)}}
+@keyframes fade{to{opacity:1}}
+.top{padding:26px 22px 8px;text-align:center}
+.date-tag{display:inline-block;border:2px dashed #f4f1e688;border-radius:8px;padding:2px 12px;font-size:14px}
+h1{font-size:30px;line-height:1.3;margin:12px 0 4px}
+.note{font-size:16px;line-height:1.7;opacity:.92;white-space:pre-wrap}
+.wrap{padding:0 16px}
+.roll{margin:16px 0 4px;font-size:22px;text-align:center;line-height:1.6}
+.roll b{color:var(--yel);font-size:26px}
+.roll small{display:block;font-size:15px;opacity:.75}
+.day{position:relative;background:#ffffff0d;border:2px solid #f4f1e655;border-radius:16px;padding:16px 14px 14px;margin-top:14px;transition:border-color .3s}
+.day.ok{border-color:#ffe27aaa}
+.dt{font-size:24px;margin-bottom:12px}.dt small{font-size:16px;opacity:.8;margin-left:8px}
+.ox{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ox button{font-family:inherit;border:2px solid #f4f1e6aa;background:transparent;color:var(--chalk);border-radius:14px;padding:10px 2px 9px;font-size:15px;font-weight:600;transition:transform .12s}
+.ox button span{display:block;font-size:28px;line-height:1.2}
+.ox button:active{transform:scale(.93)}
+.ox .o.sel{background:var(--o);border-color:var(--o);color:#fff}
+.ox .s.sel{background:var(--s);border-color:var(--s);color:#fff}
+.ox .x.sel{background:var(--x);border-color:var(--x);color:#fff}
+.say{display:none;margin-top:12px;background:var(--chalk);color:#2a2a2a;border-radius:14px;padding:10px 12px 10px 48px;font-size:16px;line-height:1.5;position:relative;animation:pop .35s}
+.say:before{content:"👨‍🏫";position:absolute;left:10px;top:7px;font-size:26px}
+.say.on{display:block}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.more{margin-top:16px;border:2px dashed #f4f1e666;border-radius:16px;padding:12px 14px}
+.more summary{list-style:none;font-size:16px}
+.more summary::-webkit-details-marker{display:none}
+textarea{width:100%;margin-top:10px;font-family:inherit;font-size:17px;padding:12px;border:0;border-radius:12px;background:var(--chalk);color:#222}
+.bar{position:fixed;left:0;right:0;bottom:0;padding:10px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(#8a5a32,#6e4524);box-shadow:0 -3px 10px #0005;z-index:5}
+.bar:before{content:"";position:absolute;left:24px;top:-7px;width:44px;height:9px;border-radius:3px;background:#fff;box-shadow:58px 0 0 #ffe27a,104px 0 0 #ffb3c7}
+.left{text-align:center;font-size:15px;margin-bottom:8px;color:#fff}
+.go{width:100%;font-family:inherit;border:0;border-radius:14px;background:var(--yel);color:#3a2a10;font-size:21px;font-weight:600;padding:15px}
+.go:disabled{background:#c9b98d;color:#6b5b3a}
+.done{text-align:center;padding:10px 4px 20px}
+.done h2{font-size:30px;margin:6px 0}
+.card{position:relative;background:#fbf7ea;color:#333;border-radius:6px;padding:22px 18px 18px;margin:18px 4px;text-align:left;box-shadow:0 6px 18px #0006;background-image:repeating-linear-gradient(#fbf7ea 0 33px,#d8e3f0 33px 34px)}
+.card h3{margin:0 0 6px;font-size:18px;letter-spacing:6px}
+.card .r{display:flex;justify-content:space-between;align-items:center;height:34px;font-size:17px}
+.card em{font-style:normal;font-weight:700;color:#fff;border-radius:99px;padding:2px 12px;font-size:15px}
+.stamp{position:absolute;right:6px;top:-30px;width:104px;height:104px;border-radius:50%;transform:rotate(-14deg) scale(3);opacity:0;background:#fbf7eacc}
+.stamp svg{width:100%;height:100%;display:block}
+.stamp.go2{animation:stamp .45s .5s forwards}
+@keyframes stamp{to{transform:rotate(-14deg) scale(1);opacity:.9}}
+.btn2{font-family:inherit;border:2px solid #f4f1e6aa;background:transparent;color:var(--chalk);border-radius:14px;padding:11px 18px;font-size:17px;margin:6px}
+.msg{font-size:18px;line-height:1.8;margin-top:6px}
+.memo{margin-top:10px}
+.memo input{width:100%;font-family:inherit;font-size:17px;padding:11px 12px;border:0;border-radius:12px;background:var(--chalk);color:#222}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chips button{font-family:inherit;font-size:14px;border:1.5px solid #f4f1e6aa;background:transparent;color:var(--chalk);border-radius:99px;padding:5px 11px}
+.snd{position:fixed;top:10px;right:10px;z-index:25;width:42px;height:42px;border-radius:50%;border:1.5px solid #f4f1e677;background:#0003;color:#fff;font-size:20px}
+#intro .start{margin-top:30px;font-family:inherit;font-size:20px;border:2px solid var(--chalk);background:transparent;color:var(--chalk);border-radius:99px;padding:12px 26px;animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.55}}
+.card .m{font-size:15px;color:#a0660a;margin:-4px 0 2px 8px}
+.hide{display:none!important}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:30}
+</style></head><body>
+<div id="intro" class="chalk" onclick="startIntro()"><div class="bell">🔔</div><div class="k">キーンコーンカーンコーン♪</div><div class="t">出席をとります</div><button class="start" id="startBtn">▶ タップして出席をとる</button><div class="tap">音が出ます</div></div>
+<button class="snd hide" id="snd" onclick="toggleSnd()">🔊</button>
+<canvas id="fx"></canvas>
+<div class="top chalk"><span class="date-tag" id="today"></span><h1 id="title">読み込み中…</h1><div class="note" id="note"></div></div>
+<div class="wrap chalk">
+  <div id="form" class="hide">
+    <div class="roll"><span id="who">みなさん</span>！<small>行ける日に「はーい！」をお願いします</small></div>
+    <div id="dates"></div>
+    <details class="more hide"><summary>✏️ みんなへのひとこと（なくてOK）</summary><textarea id="comment" rows="2" placeholder="例: 2次会から行きます／あの頃の話をしたい人がいます"></textarea></details>
+  </div>
+  <div id="done" class="done hide">
+    <div class="msg" id="bye1">起立！ 礼！</div>
+    <h2>ありがとうございました🌸</h2>
+    <div class="msg" id="bye2"></div>
+    <div class="card"><div class="stamp" id="stamp">優</div><h3>出 席 カ ー ド</h3><div id="mine"></div></div>
+    <button class="btn2" onclick="formView()">✏️ 書き直す</button><button class="btn2" onclick="bye()">とじる</button>
+  </div>
+</div>
+<div class="bar hide" id="bar"><div class="left" id="left"></div><button class="go" id="go" onclick="send()" disabled>提出する</button></div>
+<script>
+var LIFF_ID = '2012622212-6mexdvhC';
+var API = 'https://script.google.com/macros/s/AKfycbzkfhzJ_BjT2YuCkLHHabcPHMnVoOjZfTPblXq4W8_p2LoKuuddV3AIBPCa2PqdShYNbQ/exec';
+var D = null, pick = {}, said = {}, ME = '';
+var OX = [['○','o','はーい！'],['△','s','たぶん…'],['×','x','欠席します']], COL = {'○':'#36c26b','△':'#f2a516','×':'#e5484d'};
+var LINES = {'○':'楽しみにしてます！','△':'ひとこと書いておくと助かります（なくてもOK）','×':'残念…次は会えますように'};
+var CHIPS = ['19時から参加できます','途中から参加します','途中で帰ります','まだ分かりません'];
+var memo = {};
+
+function el(i){return document.getElementById(i)}
+function show(id,on){el(id).classList.toggle('hide',!on)}
+function rnd(a){return a[Math.floor(Math.random()*a.length)]}
+function call(o){o.idToken=liff.getIDToken();return fetch(API,{method:'POST',body:JSON.stringify(o)}).then(function(r){return r.json()})}
+var d0=new Date(); el('today').textContent=(d0.getMonth()+1)+'月'+d0.getDate()+'日（'+'日月火水木金土'[d0.getDay()]+'）';
+var introDone=false, started=false, ready=null;
+function startIntro(){if(started)return;started=true;el('startBtn').style.visibility='hidden';el('intro').classList.add('go');snd.chime();setTimeout(closeIntro,3300)}
+function closeIntro(){if(introDone)return;introDone=true;el('intro').style.opacity=0;show('snd',true);setTimeout(function(){show('intro',false)},600);if(ready)ready()}
+liff.init({liffId: LIFF_ID}).then(function(){
+  if(!liff.isLoggedIn()){liff.login({redirectUri: location.href});return}
+  liff.getProfile().then(function(p){ME=p.displayName;el('who').innerHTML='';var b=document.createElement('b');b.textContent=ME+'さん';el('who').appendChild(b)}).catch(function(){});
+  return call({act:'open'}).then(function(r){
+    if(!r.ok) throw new Error(r.err);
+    D=r; el('title').textContent=r.title||'同窓会'; el('note').textContent=r.note||'';
+    var go=function(){ if(r.mine){pick=r.mine.a||{}; unpack(r.mine.c||''); doneView(false)} else formView(); };
+    if(introDone) go(); else ready=go;
+  });
+}).catch(function(e){started=true;closeIntro();el('title').textContent='開けませんでした';el('note').textContent=(e&&e.message)||'LINEの中で開き直してください'});
+function split(d){var m=String(d).match(/^(.*?[)）])\s*(.*)$/);return m?[m[1],m[2]]:[d,'']}
+function draw(){
+  var box=el('dates'); box.innerHTML='';
+  D.dates.forEach(function(d){
+    var c=document.createElement('div'); c.className='day'+(pick[d]?' ok':'');
+    var s=split(d), t=document.createElement('div'); t.className='dt'; t.textContent=s[0];
+    if(s[1]){var sm=document.createElement('small');sm.textContent=s[1];t.appendChild(sm)} c.appendChild(t);
+    var ox=document.createElement('div'); ox.className='ox';
+    OX.forEach(function(k){var b=document.createElement('button');b.className=k[1]+(pick[d]===k[0]?' sel':'');b.innerHTML='<span>'+k[0]+'</span>'+k[2];
+      b.onclick=function(ev){var changed=pick[d]!==k[0];pick[d]=k[0];said[d]=LINES[k[0]];if(changed)snd.pick(k[0]);draw();
+        if(changed){var r=ev.target.closest('button').getBoundingClientRect();if(k[0]==='○')burst(r.left+r.width/2,r.top+r.height/2,26);
+          if(k[0]==='×'){var cs=document.querySelectorAll('.day');var i=D.dates.indexOf(d);cs[i].classList.add('shake')}}};
+      ox.appendChild(b)});
+    c.appendChild(ox);
+    var sy=document.createElement('div'); sy.className='say'+(pick[d]&&said[d]?' on':''); sy.textContent=said[d]||''; c.appendChild(sy);
+    if(pick[d]==='△'){var mm=document.createElement('div');mm.className='memo';var inp=document.createElement('input');inp.placeholder='例: 19時から参加できます';inp.value=memo[d]||'';inp.maxLength=60;inp.oninput=function(){memo[d]=inp.value};mm.appendChild(inp);
+      var ch=document.createElement('div');ch.className='chips';CHIPS.forEach(function(t){var cb=document.createElement('button');cb.textContent=t;cb.onclick=function(){inp.value=t;memo[d]=t;snd.tick()};ch.appendChild(cb)});mm.appendChild(ch);c.appendChild(mm)}
+    box.appendChild(c);
+  });
+  var n=D.dates.filter(function(d){return !pick[d]}).length;
+  el('left').textContent=n?'あと '+n+' 日、返事をください':'ぜんぶ書けました！';
+  el('go').disabled=n>0; el('go').textContent='提出する ✏️';
+}
+function formView(){said={};D.dates.forEach(function(d){if(pick[d])said[d]=LINES[pick[d]]});show('done',false);show('form',true);show('bar',true);draw()}
+function doneView(fresh){
+  show('form',false);show('bar',false);show('done',true);
+  var m=el('mine'); m.innerHTML='';
+  if(ME){var nm=document.createElement('div');nm.className='r';nm.textContent='なまえ　'+ME;m.appendChild(nm)}
+  D.dates.forEach(function(d){var v=pick[d]||'－';var r=document.createElement('div');r.className='r';r.innerHTML='<span></span><em></em>';r.firstChild.textContent=d;
+    var e=r.lastChild;e.textContent=v+' '+((OX.filter(function(k){return k[0]===v})[0]||[0,0,''])[2]);e.style.background=COL[v]||'#9ca3af';m.appendChild(r);if(v==='△'&&memo[d]){var mt=document.createElement('div');mt.className='m';mt.textContent='└ '+memo[d];m.appendChild(mt)}});
+  var c=el('comment').value.trim(); if(c){var r=document.createElement('div');r.className='r';r.textContent='ひとこと　'+c;m.appendChild(r)}
+  var sc=0;D.dates.forEach(function(d){if(pick[d]==='○')sc+=1;else if(pick[d]==='△')sc+=.5});sc=D.dates.length?sc/D.dates.length:0;
+  var g=sc>=.67?'優':sc>=.34?'良':sc>0?'可':'';var anyO=sc>0;
+  el('bye2').textContent=g?'会えるのを楽しみにしています。':'今回は残念…また会える日を待っています。';
+  var st=el('stamp'); st.innerHTML=stampSvg(g); st.classList.remove('go2'); void st.offsetWidth; st.classList.add('go2');if(fresh!==false)setTimeout(snd.stamp,520)
+  window.scrollTo(0,0);
+  if(fresh!==false){snd.fin(anyO);sakura();if(anyO)setTimeout(function(){burst(innerWidth/2,innerHeight*.35,70)},300)}
+}
+function stampSvg(g){
+  var n=10,u=Math.floor(Math.random()*n),ring='';for(var i=0;i<n;i++)ring+=(i===u?'上原':'古橋');
+  var mid=g?'<text x="50" y="51" text-anchor="middle" dominant-baseline="central" font-size="34" font-weight="700">'+g+'</text>'
+   :'<text text-anchor="middle" font-size="10.5" font-weight="700"><tspan x="50" y="37">次回は</tspan><tspan x="50" y="49">参加</tspan><tspan x="50" y="61">お願い</tspan><tspan x="50" y="73">します</tspan></text>';
+  return '<svg viewBox="0 0 100 100" fill="#d92b2b" font-family="Klee One,serif"><defs><path id="rg" d="M50,50 m-35,0 a35,35 0 1,1 70,0 a35,35 0 1,1 -70,0"/></defs>'
+   +'<circle cx="50" cy="50" r="47" fill="none" stroke="#d92b2b" stroke-width="3.5"/><circle cx="50" cy="50" r="32" fill="none" stroke="#d92b2b" stroke-width="1.5"/>'
+   +'<text font-size="9.5" font-weight="600"><textPath href="#rg" textLength="216" lengthAdjust="spacingAndGlyphs">'+ring+'</textPath></text>'+mid+'</svg>'}
+function pack(){var L=[];D.dates.forEach(function(d){if(pick[d]==='△'&&memo[d]&&memo[d].trim())L.push('【'+d+'】'+memo[d].trim())});var c=el('comment').value.trim();if(c)L.push(c);return L.join('\n')}
+function unpack(t){memo={};var rest=[];String(t).split('\n').forEach(function(l){var m=l.match(/^【(.+?)】(.*)$/);if(m)memo[m[1]]=m[2];else if(l)rest.push(l)});el('comment').value=rest.join('\n')}
+function bye(){try{liff.closeWindow()}catch(e){}}
+function send(){
+  el('go').disabled=true; el('go').textContent='提出中…';
+  call({act:'answer',answers:pick,comment:pack()}).then(function(r){
+    if(!r.ok) throw new Error(r.err); doneView(true);
+  }).catch(function(){el('go').disabled=false;el('go').textContent='届きませんでした。もう一度押す'});
+}
+// ---- 音(ファイルなし、その場で鳴らす) ----
+var muted=false;try{muted=localStorage.getItem('mute')==='1'}catch(e){}
+function toggleSnd(){muted=!muted;el('snd').textContent=muted?'🔇':'🔊';try{localStorage.setItem('mute',muted?'1':'0')}catch(e){}}
+var snd=(function(){var ac=null;function A(){if(!ac){var C=window.AudioContext||window.webkitAudioContext;if(!C)return null;ac=new C()}if(ac.state==='suspended')ac.resume();return ac}
+ function tone(f,t,dur,type,vol,f2){var a=A();if(!a||muted)return;var o=a.createOscillator(),g=a.createGain(),t0=a.currentTime+t;o.type=type||'sine';o.frequency.setValueAtTime(f,t0);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t0+dur);g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(vol||.2,t0+.015);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);o.connect(g);g.connect(a.destination);o.start(t0);o.stop(t0+dur+.05)}
+ function bell(f,t){tone(f,t,1.4,'sine',.22);tone(f*2.01,t,.8,'sine',.06);tone(f*3,t,.4,'triangle',.03)}
+ return{chime:function(){[659,523,587,392,392,587,659,523].forEach(function(f,i){bell(f,i*.36)})},
+  pick:function(k){if(k==='○'){tone(784,0,.15,'triangle',.25);tone(1047,.09,.25,'triangle',.25)}else if(k==='△'){tone(660,0,.25,'sine',.2)}else{tone(330,0,.22,'square',.07,250);tone(250,.2,.35,'square',.07,180)}},
+  tick:function(){tone(1200,0,.06,'sine',.12)},
+  stamp:function(){tone(120,0,.25,'sine',.5,50);tone(90,0,.18,'triangle',.3,40)},
+  fin:function(good){if(good){[523,659,784,1047].forEach(function(f,i){tone(f,i*.12,.35,'triangle',.2)});tone(1319,.5,.7,'triangle',.18)}else{[523,494,440].forEach(function(f,i){tone(f,i*.25,.4,'sine',.16)})}}}})();
+el('snd').textContent=muted?'🔇':'🔊';
+// ---- 紙ふぶき・さくら ----
+var cv=el('fx'),cx=cv.getContext('2d'),P=[],run=false;
+function fit(){cv.width=innerWidth*devicePixelRatio;cv.height=innerHeight*devicePixelRatio;cx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)}
+fit();addEventListener('resize',fit);
+function loop(){cx.clearRect(0,0,innerWidth,innerHeight);P=P.filter(function(p){return p.life>0});
+  P.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.vy+=p.g;p.vx*=.99;p.a+=p.va;p.life--;cx.save();cx.globalAlpha=Math.min(1,p.life/30);cx.translate(p.x,p.y);cx.rotate(p.a);
+    if(p.k){cx.fillStyle=p.c;cx.beginPath();cx.ellipse(0,0,6,3.6,0,0,7);cx.fill()}else{cx.fillStyle=p.c;cx.fillRect(-4,-2.5,8,5)}cx.restore()});
+  if(P.length)requestAnimationFrame(loop);else run=false}
+function kick(){if(!run){run=true;requestAnimationFrame(loop)}}
+function burst(x,y,n){var cs=['#ffe27a','#ffb3c7','#7fd8ff','#36c26b','#fff'];for(var i=0;i<n;i++){var a=Math.random()*6.28,s=3+Math.random()*5;P.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-3,g:.18,a:0,va:Math.random()*.3-.15,life:70+Math.random()*30,c:rnd(cs)})}kick()}
+function sakura(){for(var i=0;i<45;i++)P.push({x:Math.random()*innerWidth,y:-20-Math.random()*innerHeight*.8,vx:Math.random()*1-.3,vy:1+Math.random()*1.2,g:0,a:Math.random()*6,va:.03,life:260+Math.random()*120,c:rnd(['#ffc4d6','#ffb3c7','#ffd6e2']),k:1});kick()}
+</script></body></html>
