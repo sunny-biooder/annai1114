@@ -95,7 +95,9 @@ textarea{width:100%;margin-top:10px;font-family:inherit;font-size:17px;padding:1
 </div>
 <div class="bar hide" id="bar"><div class="left" id="left"></div><button class="go" id="go" onclick="send()" disabled>提出する</button></div>
 <script>
-var LIFF_ID = '2012622212-6mexdvhC';
+// 本番・審査用・開発用で LIFF ID を切り替える(開く先のURLの ?ch= で決まる)
+var LIFF_IDS = { prod: '2012622212-6mexdvhC', review: '2012622211-M2JtAZyj', dev: '2012622210-AppnwSMP' };
+var LIFF_ID = LIFF_IDS[new URLSearchParams(location.search).get('ch')] || LIFF_IDS.prod;
 var API = 'https://script.google.com/macros/s/AKfycbzkfhzJ_BjT2YuCkLHHabcPHMnVoOjZfTPblXq4W8_p2LoKuuddV3AIBPCa2PqdShYNbQ/exec';
 var D = null, pick = {}, said = {}, ME = '';
 var OX = [['○','o','はーい！'],['△','s','たぶん…'],['×','x','欠席します']], COL = {'○':'#36c26b','△':'#f2a516','×':'#e5484d'};
@@ -106,7 +108,7 @@ var memo = {};
 function el(i){return document.getElementById(i)}
 function show(id,on){el(id).classList.toggle('hide',!on)}
 function rnd(a){return a[Math.floor(Math.random()*a.length)]}
-function call(o){o.idToken=liff.getIDToken();return fetch(API,{method:'POST',body:JSON.stringify(o)}).then(function(r){return r.json()})}
+function call(o){o.idToken=liff.getIDToken();o.cid=LIFF_ID.split('-')[0];return fetch(API,{method:'POST',body:JSON.stringify(o)}).then(function(r){return r.json()})}
 var d0=new Date(); el('today').textContent=(d0.getMonth()+1)+'月'+d0.getDate()+'日（'+'日月火水木金土'[d0.getDay()]+'）';
 var introDone=false, started=false, ready=null;
 function startIntro(){if(started)return;started=true;el('startBtn').style.visibility='hidden';el('intro').classList.add('go');snd.chime();setTimeout(closeIntro,3300)}
